@@ -1,0 +1,466 @@
+# notes & info in green
+commands in pink
+outputs from mothur in blue
+
+## started Monday 9 May and everything in folder called Soil CoEx Seqs
+
+# read in seqs
+
+make.contigs(file=stability.files, processors=30)
+
+#output for read no:
+
+It took 16 secs to process 200918 sequences.
+
+Group count:
+DNA1	23384
+DNA2	33131
+DNA3	53168
+cDNA1	21801
+cDNA2	43694
+cDNA3	25740
+
+Total of all groups is 200918
+# have a wee look
+
+summary.seqs(fasta=stability.trim.contigs.fasta)
+
+Using 30 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	249	249	0	3	1
+2.5%-tile:	1	253	253	0	3	5023
+25%-tile:	1	253	253	0	4	50230
+Median: 	1	253	253	0	4	100460
+75%-tile:	1	253	253	0	5	150689
+97.5%-tile:	1	254	254	3	6	195896
+Maximum:	1	502	502	149	250	200918
+Mean:	1	253.472	253.472	0.448198	4.57356
+# of Seqs:	200918
+
+Output File Names:
+stability.trim.contigs.summary
+
+# reads should be 250bp long so we'll trim now using SOP recommendations
+
+screen.seqs(fasta=stability.trim.contigs.fasta, group=stability.contigs.groups, maxambig=0, maxlength=275)
+
+Output File Names:
+stability.trim.contigs.good.fasta
+stability.trim.contigs.bad.accnos
+stability.contigs.good.groups
+
+# have a quick look to see how many we lost:
+
+summary.seqs(fasta=current)
+
+Using 30 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	251	251	0	3	1
+2.5%-tile:	1	253	253	0	3	3811
+25%-tile:	1	253	253	0	4	38104
+Median: 	1	253	253	0	4	76207
+75%-tile:	1	253	253	0	5	114310
+97.5%-tile:	1	254	254	0	6	148602
+Maximum:	1	275	275	0	9	152412
+Mean:	1	253.102	253.102	0	4.51729
+# of Seqs:	152412
+
+# so we went from 200918 seqs to 152412
+
+# next reduce computer workload by only working with unique seqs as many will be repeats of same seq
+
+unique.seqs(fasta=stability.trim.contigs.good.fasta)
+
+Output File Names:
+stability.trim.contigs.good.names
+stability.trim.contigs.good.unique.fasta
+
+# also to improve comp effeciency and file sizes;
+count.seqs(name=stability.trim.contigs.good.names, group=stability.contigs.good.groups)
+
+
+Output File Names:
+stability.trim.contigs.good.count_table
+
+#
+
+# adapt silva database for 515f/806r
+
+## # got ecoli fasta sequence from here
+## http://www.ncbi.nlm.nih.gov/nuccore/174375?report=fasta
+## pcrtest.oligos is text file containing following
+forward GTGCCAGCMGCCGCGGTAA
+reverse GGACTACHVGGGTWTCTAAT
+## seqs for 515f 806r
+
+pcr.seqs(fasta=ecoli16.fasta, oligos=pcrTest.oligos)
+Using 30 processors.
+Processing sequence: 1
+
+Output File Names:
+ecoli16.pcr.fasta
+
+It took 0 secs to screen 1 sequences.
+
+
+align.seqs(fasta=ecoli16.pcr.fasta, reference=silva.bacteria.fasta)
+
+summary.seqs()
+
+
+# then align this against whole database
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	13862	23444	253	0	6	1
+2.5%-tile:	0	0	0	0	0	1
+25%-tile:	0	0	0	0	0	1
+Median: 	0	0	0	0	0	1
+75%-tile:	0	0	0	0	0	1
+97.5%-tile:	0	0	0	0	0	1
+Maximum:	13862	23444	253	0	6	1
+Mean:	13862	23444	253	0	6
+# of Seqs:	1
+
+#therefore use start = 13862 and end=23444
+
+pcr.seqs(fasta=silva.bacteria.fasta, start=13862, end=23444, keepdots=F, processors=30)
+
+#rename file
+
+system(mv silva.bacteria.pcr.fasta silva.v4.fasta)
+
+# have a wee look
+summary.seqs(fasta=silva.v4.fasta)
+Using 30 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	8721	229	0	3	1
+2.5%-tile:	8	9582	251	0	3	374
+25%-tile:	8	9582	252	0	4	3740
+Median: 	8	9582	252	0	4	7479
+75%-tile:	8	9582	252	0	5	11218
+97.5%-tile:	8	9582	253	1	6	14583
+Maximum:	9	9582	310	5	9	14956
+Mean:	7.99719	9581.94	251.969	0.0520193	4.56646
+# of Seqs:	14956
+
+
+# now do alignment:
+align.seqs(fasta=stability.trim.contigs.good.unique.fasta, reference=silva.v4.fasta, flip=T)
+
+Output File Names:
+stability.trim.contigs.good.unique.align
+stability.trim.contigs.good.unique.align.report
+stability.trim.contigs.good.unique.flip.accnos
+
+# rerun summary
+
+summary.seqs(fasta=stability.trim.contigs.good.unique.align, count=stability.trim.contigs.good.count_table)
+
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	8	14	4	0	2	1
+2.5%-tile:	8	9582	252	0	3	3811
+25%-tile:	8	9582	252	0	4	38104
+Median: 	8	9582	252	0	4	76207
+75%-tile:	8	9582	252	0	5	114310
+97.5%-tile:	8	9582	253	0	6	148602
+Maximum:	17	9582	264	0	9	152412
+Mean:	8.00023	9581.83	252.049	0	4.51714
+# of unique seqs:	52269
+total # of seqs:	152412
+
+# so we'll screen seqs next to exclude any seqs that are aligning outside of expected region
+
+screen.seqs(fasta=stability.trim.contigs.good.unique.align, count=stability.trim.contigs.good.count_table, summary=stability.trim.contigs.good.unique.summary, start=8, end=9582, maxhomop=8)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.summary
+stability.trim.contigs.good.unique.good.align
+stability.trim.contigs.good.unique.bad.accnos
+stability.trim.contigs.good.good.count_table
+
+# check
+summary.seqs(fasta=current, count=current)
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	8	9582	237	0	3	1
+2.5%-tile:	8	9582	252	0	3	3801
+25%-tile:	8	9582	252	0	4	38007
+Median: 	8	9582	252	0	4	76013
+75%-tile:	8	9582	252	0	5	114019
+97.5%-tile:	8	9582	253	0	6	148225
+Maximum:	8	9582	264	0	8	152025
+Mean:	8	9582	252.053	0	4.51686
+# of unique seqs:	51990
+total # of seqs:	152025
+
+# remove any overhangs and any now empty in our count table
+filter.seqs(fasta=stability.trim.contigs.good.unique.good.align, vertical=T, trump=.)
+
+Length of filtered alignment: 505
+Number of columns removed: 9077
+Length of the original alignment: 9582
+Number of sequences used to construct filter: 51990
+
+#re-run unique seqs in case of any redundancy
+unique.seqs(fasta=stability.trim.contigs.good.unique.good.filter.fasta, count=stability.trim.contigs.good.good.count_table)
+
+# split the sequences by group and then sort them by abundance and go from most abundant to least and identify sequences that are within 2 nt of each other
+pre.cluster(fasta=stability.trim.contigs.good.unique.good.filter.unique.fasta, count=stability.trim.contigs.good.unique.good.filter.count_table, diffs=2)
+
+Total number of sequences before pre.cluster was 17813.
+pre.cluster removed 6431 sequences.
+
+It took 23 secs to cluster 17813 sequences.
+It took 26 secs to run pre.cluster.
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta
+stability.trim.contigs.good.unique.good.filter.unique.precluster.count_table
+stability.trim.contigs.good.unique.good.filter.unique.precluster.DNA1.map
+stability.trim.contigs.good.unique.good.filter.unique.precluster.DNA2.map
+stability.trim.contigs.good.unique.good.filter.unique.precluster.DNA3.map
+stability.trim.contigs.good.unique.good.filter.unique.precluster.cDNA1.map
+stability.trim.contigs.good.unique.good.filter.unique.precluster.cDNA2.map
+stability.trim.contigs.good.unique.good.filter.unique.precluster.cDNA3.map
+
+
+# remove chimeras
+
+chimera.uchime(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.count_table
+stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.chimeras
+stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.accnos
+
+# this has removed chimeras from count file but not from fasta file, so do this:
+remove.seqs(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta, accnos=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.accnos)
+
+Removed 17430 sequences from your fasta file.
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta
+
+
+# check how many seqs are left after this.
+summary.seqs(fasta=current, count=current)
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	505	241	0	3	1
+2.5%-tile:	1	505	252	0	3	3264
+25%-tile:	1	505	252	0	4	32636
+Median: 	1	505	252	0	4	65272
+75%-tile:	1	505	252	0	5	97907
+97.5%-tile:	1	505	253	0	6	127279
+Maximum:	1	505	261	0	8	130542
+Mean:	1	505	252.051	0	4.49881
+# of unique seqs:	15983
+total # of seqs:	130542
+
+# now identify our seqs so we can remove any that are from unexpected guys (ie not bacteria or archaea as that is all we should pick up with 515f/806r)
+
+classify.seqs(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.count_table, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, cutoff=80)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.taxonomy
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.tax.summary
+
+# remove undesirables
+remove.lineage(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.count_table, taxonomy=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.taxonomy, taxon=Chloroplast-Mitochondria-unknown-Eukaryota)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta
+stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.pick.count_table
+
+# have a look whats left
+
+summary.seqs(fasta=current, count=current)
+
+
+ 
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	505	241	0	3	1
+2.5%-tile:	1	505	252	0	3	3260
+25%-tile:	1	505	252	0	4	32596
+Median: 	1	505	252	0	4	65192
+75%-tile:	1	505	252	0	5	97788
+97.5%-tile:	1	505	253	0	6	127124
+Maximum:	1	505	259	0	8	130383
+Mean:	1	505	252.051	0	4.49863
+# of unique seqs:	15929
+total # of seqs:	130383
+
+
+# Now to cluster our seqs into OTUS
+# where taxlevel=4 corresponds to order
+cluster.split(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.pick.count_table, taxonomy=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy, splitmethod=classify, taxlevel=4, cutoff=0.15)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list
+
+# find out how many seqs are in each OTU in each group
+
+make.shared(list=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.pick.count_table, label=0.03)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.shared
+
+# find out taxonomy for each of our OTUS
+
+classify.otu(list=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.pick.count_table, taxonomy=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy, label=0.03)
+
+Output File Names:
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.cons.taxonomy
+stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.cons.tax.summary
+
+
+# rename to make life easier as these long names are CRAZY!
+
+system(mv stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.shared stability.an.shared)
+
+system(mv stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.cons.taxonomy stability.an.cons.taxonomy)
+# See how many seqs we have in each sample now
+count.groups(shared=stability.an.shared)
+
+DNA1 contains 14337.
+DNA2 contains 20193.
+DNA3 contains 32338.
+cDNA1 contains 14003.
+cDNA2 contains 30812.
+cDNA3 contains 18700.
+
+Total seqs: 130383.
+
+# as our lowest seq no is 14003, in cDNA1, we'll rarefy by subsampling to that level
+ 
+sub.sample(shared=stability.an.shared, size=14003)
+
+Output File Names:
+stability.an.0.03.subsample.shared
+
+
+
+
+# now for analysis
+# Alpha diversity
+
+rarefaction.single(shared=stability.an.shared, calc=sobs, freq=100)
+
+Output File Names:
+stability.an.groups.rarefaction
+
+# get a table containing the number of sequences, the sample coverage, the number of observed OTUs, and the Inverse Simpson diversity estimate using the summary.single command.
+summary.single(shared=stability.an.shared, calc=nseqs-coverage-sobs-invsimpson, subsample=14003)
+
+Output File Names:
+stability.an.groups.ave-std.summary
+stability.an.groups.summary
+
+
+
+Beta Diversity
+10 May 2016
+
+
+#1. Calculate the similarity of the membership and structure found in the various samples
+
+dist.shared(shared=stability.an.shared, calc=thetayc-jclass-braycurtis, subsample=14003, processors=30)
+
+# Output File Names:
+stability.an.thetayc.0.03.lt.dist
+stability.an.jclass.0.03.lt.dist
+stability.an.braycurtis.0.03.lt.dist
+stability.an.thetayc.0.03.lt.ave.dist
+stability.an.thetayc.0.03.lt.std.dist
+stability.an.jclass.0.03.lt.ave.dist
+stability.an.jclass.0.03.lt.std.dist
+stability.an.braycurtis.0.03.lt.ave.dist
+stability.an.braycurtis.0.03.lt.std.dist
+
+# actually gonna rerun this, just for braycurtis to give a square dist matrix instead of triangle coz it's easier for plotting nmds in r using script from lime data
+
+dist.shared(shared=stability.an.shared, calc=braycurtis, subsample=14003, processors=30, output=square)
+Output File Names:
+stability.an.braycurtis.0.03.square.dist
+stability.an.braycurtis.0.03.square.ave.dist
+stability.an.braycurtis.0.03.square.std.dist
+
+# generate newick formatted trees (for each calc metric) to visualise distances between samples
+
+# Theta Yue and Clayton
+tree.shared(phylip=stability.an.thetayc.0.03.lt.ave.dist)
+Output File Names:
+stability.an.thetayc.0.03.lt.ave.tre
+
+# Braycurtis
+tree.shared(phylip=stability.an.braycurtis.0.03.lt.ave.dist)
+Output File Names:
+stability.an.braycurtis.0.03.lt.ave.tre
+
+# Jaccard
+tree.shared(phylip=stability.an.jclass.0.03.lt.ave.dist)
+Output File Names:
+stability.an.jclass.0.03.lt.ave.tre
+
+# parsimony to check clustering according cDNA and DNA
+parsimony(tree=stability.an.thetayc.0.03.lt.ave.tre, group=Nuc.design,  groups=all)
+
+Tree#	Groups	ParsScore	ParsSig
+1	DNA-cDNA	1	0.075
+
+
+Output File Names:
+stability.an.thetayc.0.03.lt.ave.tre.parsimony
+stability.an.thetayc.0.03.lt.ave.tre.psummary
+
+parsimony(tree=stability.an.braycurtis.0.03.lt.ave.tre, group=Nuc.design,  groups=all)
+
+Tree#	Groups	ParsScore	ParsSig
+1	DNA-cDNA	1	0.078
+
+
+Output File Names:
+stability.an.braycurtis.0.03.lt.ave.tre.parsimony
+stability.an.braycurtis.0.03.lt.ave.tre.psummary
+
+
+parsimony(tree=stability.an.jclass.0.03.lt.ave.tre, group=Nuc.design,  groups=all)
+Tree#	Groups	ParsScore	ParsSig
+1	DNA-cDNA	1	0.074
+
+
+Output File Names:
+stability.an.jclass.0.03.lt.ave.tre.parsimony
+stability.an.jclass.0.03.lt.ave.tre.psummary
+ 
+# make nMDS to visualise
+nmds(phylip=stability.an.thetayc.0.03.lt.ave.dist)
+
+Number of dimensions:	2
+Lowest stress :	0.00732333
+R-squared for configuration:	0.999838
+
+Output File Names:
+stability.an.thetayc.0.03.lt.ave.nmds.iters
+stability.an.thetayc.0.03.lt.ave.nmds.stress
+stability.an.thetayc.0.03.lt.ave.nmds.axes
+
+amova(phylip=stability.an.thetayc.0.03.lt.ave.dist, design=Nuc.design)
+
+#output
+DNA-cDNA	Among	Within	Total
+SS	1.02213	0.0179013	1.04003
+df	1	4	5
+MS	1.02213	0.00447532
+
+Fs:	228.393
+p-value: 0.097
+
+homova(phylip=stability.an.thetayc.0.03.lt.ave.dist, design=Nuc.design)
+
+HOMOVA		BValue		P-value		SSwithin/(Ni-1)_values
+DNA-cDNA	0.291771	0.099		0.00630253	0.00264812
+Experiment-wise error rate: 0.05
