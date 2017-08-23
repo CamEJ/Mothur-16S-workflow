@@ -1,0 +1,20 @@
+# removing singletons 
+
+# from subsampled file
+remove.rare(shared=stability.an.0.03.subsample.shared, nseqs=1)
+
+# from full file
+remove.rare(shared=stability.an.shared, nseqs=1)
+
+# re-run alpha div analysis and see how it changes compared w original where singletons included. 
+
+
+#DNA
+summary.single(shared=stability.an.0.03.pick.shared, calc=nseqs-coverage-sobs-invsimpson, subsample=17665
+)
+
+# cdna
+summary.single(shared=stability.an.0.03.pick.shared, calc=nseqs-coverage-sobs-invsimpson, subsample=49841)
+
+
+
