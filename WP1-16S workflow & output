@@ -353,7 +353,7 @@ Output File Names:
 stability.an.groups.rarefaction
 
 # get a table containing the number of sequences, the sample coverage, the number of observed OTUs, and the Inverse Simpson diversity estimate using the summary.single command.
-summary.single(shared=stability.an.shared, calc=nseqs-coverage-sobs-invsimpson, subsample=14003)
+summary.single(shared=stability.an.shared, calc=nseqs-coverage-sobs-simpsoneven-invsimpson, subsample=14003)
 
 Output File Names:
 stability.an.groups.ave-std.summary
