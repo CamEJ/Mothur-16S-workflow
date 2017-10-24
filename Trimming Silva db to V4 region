@@ -1,6 +1,6 @@
-# Silva database trimming
-# SOP for finding out region of Silva database to align sequences against, based on primers used
-
+## Code for finding out region of Silva database to align sequences against, based on primers used
+## used ccoling's input from this forum to help
+## http://www.mothur.org/forum/viewtopic.php?t=2498
 
 
 ## 1) Create a directory containing mothur.exe etc and silva zip file unzipped and out of any subfolders (so Mothur can find them)
@@ -8,114 +8,84 @@
 ## 2) Create the following two fasta files and place in same directory:
 
 
-## a) A file containing a number of sequences of bacterial (or archael, as appropriate) in fasta format - I used 13.
+## a) A file containing a number of sequences of bacterial (or archael, as appropriate) in fasta format - I used one ecoli.
+## got ecoli fasta sequence from here 
+## http://www.ncbi.nlm.nih.gov/nuccore/174375?report=fasta
+## saved as ecoli16.fasta
 
 ## b) A file containing your primer sequences (called an 'oligo' file) -> go into note pad and enter primer sequences
 # as follows:
+## pcrtest.oligos is text file containing following 
 
-forward ACTCCTACgggAggCAgCAg
+forward GTGCCAGCMGCCGCGGTAA
 reverse GGACTACHVGGGTWTCTAAT
+## ie seqs for 515f 806r
+
 
 ## save as 'pcrTest.oligos' -> then go 
-
-pcr.seqs(fasta=13bact16s.fasta, oligos=pcrTest.oligos)
-
+pcr.seqs(fasta=ecoli16.fasta, oligos=pcrTest.oligos)
 
 
-align.seqs(fasta=13bact16s.pcr.fasta, reference=silva.bacteria.fasta)
+# then align this against whole database - in this case used silva v119 database. 
+# reference can also be a fasta file, as in the SOP
+
+align.seqs(fasta=ecoli16.pcr.fasta, reference=silva.nr_v119.align)
 
 
+# run summary seqs to see where it aligns and get start/stop position
+
+summary.seqs(fasta=ecoli16.pcr.align)
 
 
-summary.seqs(fasta=13bact16s.pcr.align)
-
-
-
-## Output should look like this:
-## (I did for both bact and arch as wasn't sure would be same)
-
-mothur > align.seqs(fasta=13bact16s.pcr.fasta, reference=silva.bacteria.fasta)
-
-Using 1 processors.
-
-Reading in the silva.bacteria.fasta template sequences...	DONE.
-It took 24 to read  14956 sequences.
-Aligning sequences from 13bact16s.pcr.fasta ...
-It took 1 secs to align 11 sequences.
-
+Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	13862	23444	253	0	6	1
+2.5%-tile:	0	0	0	0	0	1
+25%-tile:	0	0	0	0	0	1
+Median: 	0	0	0	0	0	1
+75%-tile:	0	0	0	0	0	1
+97.5%-tile:	0	0	0	0	0	1
+Maximum:	13862	23444	253	0	6	1
+Mean:	13862	23444	253	0	6
+# of Seqs:	1
 
 Output File Names: 
-13bact16s.pcr.align
-13bact16s.pcr.align.report
+ecoli16.pcr.summary
+
+## so start = 13862 and stop = 23444
+
+pcr.seqs(fasta=silva.nr_v119.align, start=13862, end=23444, keepdots=F, processors=30)
+
+Output File Names: 
+silva.nr_v119.pcr.align
 
 
-mothur > summary.seqs(fasta=13bact16s.pcr.align)
+It took 19 secs to screen 153307 sequences.
 
-Using 1 processors.
+## rename the output file: 
+system(mv silva.nr_v119.pcr.align silva.v4.fasta) 
 
+summary.seqs(fasta=silva.v4.fasta) 
+
+output:
 		Start	End	NBases	Ambigs	Polymer	NumSeqs
-Minimum:	13862	23444	246	0	4	1
-2.5%-tile:	13862	23444	0	0	4	1
-25%-tile:	13862	23444	253	0	4	3
-Median: 	13862	23444	253	0	4	6
-75%-tile:	13862	23444	253	1	5	9
-97.5%-tile:	13862	23444	254	46	46	11
-Maximum:	13862	23444	254	46	46	11
-Mean:	13862	23444	252.455	4.54545	8.18182
-# of Seqs:	11
+Minimum:	1	8211	171	0	3	1
+2.5%-tile:	8	9582	251	0	3	3833
+25%-tile:	8	9582	252	0	4	38327
+Median: 	8	9582	252	0	5	76654
+75%-tile:	8	9582	252	0	5	114981
+97.5%-tile:	8	9582	418	1	6	149475
+Maximum:	2257	9582	1081	5	16	153307
+Mean:	8.01398	9581.96	265.415	0.0476364	4.7364
+# of Seqs:	153307
 
 Output File Names: 
-13bact16s.pcr.summary
-
-It took 0 secs to summarize 11 sequences.
-
-mothur > pcr.seqs(fasta=12arch16s.fasta, oligos=pcrTest.oligos)
-
-Using 1 processors.
-
-Output File Names: 
-12arch16s.pcr.fasta
-12arch16s.bad.accnos
-12arch16s.scrap.pcr.fasta
+silva.v4.summary
 
 
-It took 0 secs to screen 12 sequences.
+## now align to customised database: 
 
-mothur > align.seqs(fasta=12arch16s.pcr.fasta, reference=silva.bacteria.fasta)
+align.seqs(fasta=stability.trim.contigs.good.unique.fasta, reference=silva.v4.fasta, flip=T) 
 
-Using 1 processors.
-
-Reading in the silva.bacteria.fasta template sequences...	DONE.
-It took 22 to read  14956 sequences.
-Aligning sequences from 12arch16s.pcr.fasta ...
-It took 0 secs to align 6 sequences.
+## from here continue with MiSeq SOP
 
 
-Output File Names: 
-12arch16s.pcr.align
-12arch16s.pcr.align.report
-
-
-mothur > summary.seqs(fasta=12arch16s.pcr.align)
-
-Using 1 processors.
-
-		Start	End	NBases	Ambigs	Polymer	NumSeqs
-Minimum:	13862	23444	253	0	4	1
-2.5%-tile:	13862	23444	0	0	4	1
-25%-tile:	13862	23444	254	0	4	2
-Median: 	13862	23444	254	0	4	4
-75%-tile:	13862	23444	254	0	4	5
-97.5%-tile:	13862	23444	255	1	5	6
-Maximum:	13862	23444	255	1	5	6
-Mean:	13862	23444	254	0.166667	4.16667
-# of Seqs:	6
-
-Output File Names: 
-12arch16s.pcr.summary
-
-It took 0 secs to summarize 6 sequences.
-
-
-
-### ie for both, start position is 13862 and end is 23444
