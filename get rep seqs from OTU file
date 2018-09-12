@@ -1,0 +1,16 @@
+# commands for getting representative sequences from each OTU:
+# change file names and processor number as appropriate
+
+# first step is to make required phylip formatted distance file:
+
+dist.seqs=(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, output=lt, processors=30)
+
+# -> this makes phylip.dist file, now proceed with next step
+
+get.oturep(phylip=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.phylip.dist, 
+list=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list, 
+count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.uchime.pick.pick.count_table, 
+fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta)
+
+# -> this makes rep.fasta and rep.count files (0.03 distance)
+
