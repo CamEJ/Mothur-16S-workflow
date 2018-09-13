@@ -3,7 +3,7 @@
 
 # first step is to make required phylip formatted distance file:
 
-dist.seqs=(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, output=lt, processors=30)
+dist.seqs(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, output=lt, processors=30)
 
 # -> this makes phylip.dist file, now proceed with next step
 
