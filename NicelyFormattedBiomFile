@@ -1,0 +1,26 @@
+# how to make a nicely formatted .biom file for reading mothur data into R and other software
+
+# you will need to have the biom convert software installed to make this work. 
+# http://biom-format.org/index.html
+
+# first step is to make the .biom file in mothur
+
+mothur > make.biom(shared=stability.opti_mcc.0.03.subsample.shared, constaxonomy=stability.cons.taxonomy)
+
+
+# Output File Names: 
+# stability.opti_mcc.0.03.subsample.0.03.biom
+
+# then, out of mothur, in command line (this is for linux system)
+
+# 1 navigate to the folder where your .biom file was just created 
+
+# 2 run the following command changing what is before -i and after -o as appropriate
+# where -i means name of input file and -o is whatever name you want to give to output file
+
+
+biom convert -i stability.an.0.03.subsample.0.03.biom -o table.from_biom_w_taxonomy.txt --to-tsv --header-key taxonomy
+
+# will output a tab delimited OTU table called 'table.from_biom_w_taxonomy.txt' which has
+# OTU number and taxonomy
+
